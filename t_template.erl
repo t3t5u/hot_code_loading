@@ -1,4 +1,4 @@
--module(t_template).
+-module(t).
 
 -export([
          a/1, b/1, c0/2, ca/1, cb/1, cc/1, cd/1, d/3,
@@ -6,7 +6,7 @@
         ]).
 
 %% To ensure function body is explicitly different!
--define(BOO,     timer:sleep(__THE_NUMBER__)).
+-define(BOO(I), io:format("BOO(~w, ~w)~n", [I, __THE_NUMBER__]), timer:sleep(__THE_NUMBER__)).
 
 p(V) ->
     io:format("~p~n", [V]).
@@ -28,28 +28,28 @@ reload(I) ->
 
 a(0) -> ok;
 a(I) ->
-    ?BOO,
+    ?BOO(I),
     p({"a() - fully qualified call -> OK", I, stacktrace()}),
     reload(I),
     t:a(I-1).
 
 b(0) -> ok;
 b(I) ->
-    ?BOO,
+    ?BOO(I),
     p({"b() - not fully qualified call -> death", I, stacktrace()}),
     reload(I),
     b(I-1).
 
 c0(_, 0) -> ok;
 c0(Fun, I) ->
-    ?BOO,
+    ?BOO(I),
     p({"c0() - call Fun -> OK if Fun is fully qualified", I, stacktrace()}),
     reload(I),
     Fun(Fun, I-1).
 
 c1(_, 0) -> ok;
 c1(Fun, I) ->
-    ?BOO,
+    ?BOO(I),
     p({"c1() [Not exported] -  call Fun -> OK if Fun is fully qualified", I, stacktrace()}),
     reload(I),
     Fun(Fun, I-1).
@@ -65,7 +65,7 @@ cb(I) ->
 cc(I) ->
     p("cc() - pass anonymous fun to c1 -> death"),
     F = fun(F, I0) ->
-                ?BOO,
+                ?BOO(I),
                 c1(F, I0)
         end,
     c1(F, I).
@@ -76,6 +76,7 @@ cd(I) ->
 
 d(_, _, 0) -> ok;
 d(Mod, Fun, I) ->
+    ?BOO(I),
     p({"d() - fully qualified call -> OK", I, stacktrace()}),
     reload(I),
     apply(Mod, Fun, [Mod, Fun, I-1]).
